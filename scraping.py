@@ -43,19 +43,13 @@ def request(start,end):
     url = f"https://api.orhanaydogdu.com.tr/deprem/live.php?limit=100"
     request_value= requests.get(url,)
     data = json.loads(request_value.text)
+  
+
+
     
-    dosya_adı_seçmek_için_sayı = random.randint(1,9999)
-    json_zaman = str(filter_end())
-
-
-    dosya_adi = "{}{}.json".format(json_zaman,dosya_adı_seçmek_için_sayı)
     array_sayısı = int(len(data['result']))
 
-    with open("data/{}".format(dosya_adi),"w" ,encoding="utf-8") as json_value:
-        json_value.write(str(data))
-
-    with open("data/{}".format(dosya_adi),"r",encoding="utf-8") as data_value:
-        api_read = json.dumps(data_value.read())
+    
     
     yikicilik_list = []
 
