@@ -8,20 +8,6 @@ import re
 import socket
 import random
 
-def dns_query():
-    d = str(urlopen('http://checkip.dyndns.com/').read())
-    dns_data = re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(d).group(1)
-    
-    return dns_data
-
-def dns_api(ip):
-    url = "http://ip-api.com/json/{}".format(ip)
-    request_value = requests.get(url)
-    data = json.loads(request_value.text)
-    array = str(data['city'])
-    array = array.upper()
-    
-    return array
 
 def filter_end():
     from datetime import date 
@@ -37,13 +23,12 @@ def filter_start():
                     timedelta(days= 1)
     
     return str(bir_gün_öncesi)
-    
 
 def request(start,end):
     url = f"https://api.orhanaydogdu.com.tr/deprem/live.php?limit=100"
     request_value= requests.get(url,)
     data = json.loads(request_value.text)
-  
+     
 
 
     
@@ -83,7 +68,7 @@ def request(start,end):
 }
     
     return json_data
-
+veri = None
 def scrapheaal():
  header = {
 
@@ -92,10 +77,41 @@ def scrapheaal():
 }
 
  resim_url = "https://heaal.meb.k12.tr"
- r = requests.get("https://heaal.meb.k12.tr/tema/icerik.php?KATEGORINO=94501" ,headers=header)
- source = BeautifulSoup(r.content,"lxml")
 
- haberler = source.find_all("div",attrs={"class","col-sm-10"}, limit=2)
+ try: 
+    r = requests.get("https://heaal.meb.k12.tr/tema/icerik.php?KATEGORINO=94501" ,timeout=5,headers=header)
+    source = BeautifulSoup(r.content,"lxml")
+ except:
+    return json.loads(veri)
+
+
+
+
+ for i in source.select("#liste > div:nth-child(2) > div:nth-child(1) > div.tarih > p.gun > time"):
+        if i.has_attr('datetime'):
+            tarih1 = i["datetime"]
+ for i in source.select("#liste > div:nth-child(3) > div:nth-child(1) > div.tarih > p.gun > time"):
+    if i.has_attr('datetime'):
+            tarih2 = i["datetime"]
+ for i in source.select("#liste > div:nth-child(4) > div:nth-child(1) > div.tarih > p.gun > time"):
+    if i.has_attr('datetime'):
+            tarih3 = i["datetime"]
+ 
+    
+
+ tarih1 = tarih1.split("-")
+ tarih1date = tarih1[2]+"/"+tarih1[1]+"/"+tarih1[0]
+
+
+ tarih2 = tarih2.split("-")
+ tarih2date = tarih2[2]+"/"+tarih2[1]+"/"+tarih2[0]
+ 
+
+ tarih3 = tarih3.split("-")
+ tarih3date = tarih3[2]+"/"+tarih3[1]+"/"+tarih3[0]
+
+ # print(tarih1[2]+"/"+tarih1[1]+"/"+tarih1[0])
+
 
  haber1 = source.select("#liste > div:nth-child(2) > div.row > div.col-sm-8 > p")
  haber2 = source.select("#liste > div:nth-child(3) > div.row > div.col-sm-8 > p")
@@ -113,18 +129,21 @@ def scrapheaal():
  resim1_url = resim_url + resim1[0]['src']
  resim2_url = resim_url + resim2[0]['src']
  resim3_url = resim_url + resim3[0]['src']
+ 
 
  json_data = {
  
   "data": [
-    {"haber": haber1[0].text, "baslik": baslik1[0].text , "resim" : resim1_url},
-    {"haber": haber2[0].text, "baslik": baslik2[0].text , "resim" : resim2_url},
-    {"haber": haber3[0].text, "baslik": baslik3[0].text , "resim" : resim3_url}
+    {"haber": haber1[0].text, "baslik": baslik1[0].text , "resim" : resim1_url,"tarih" : tarih1date},
+    {"haber": haber2[0].text, "baslik": baslik2[0].text , "resim" : resim2_url,"tarih" : tarih2date},
+    {"haber": haber3[0].text, "baslik": baslik3[0].text , "resim" : resim3_url,"tarih" : tarih3date}
   ],
    
    "author": "LavanderProjects",
    "status": "success"
 }
+ veri = json_data
+ print(veri)
  return json_data
 
 
